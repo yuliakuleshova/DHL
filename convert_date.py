@@ -26,6 +26,14 @@ dt = "Sat, 30 Sep 2023 07:39:52 +0300"
 
 print(convert_to_unixtime(dt))
 
+#Two ways to get user's time zone:
+
+tz_string = datetime.now().astimezone().tzname()
+print(tz_string)
+
+tz_string2 = datetime.now().astimezone().tzinfo
+print(tz_string2)
+
 # print(dt)
 # mnth = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Sep': 9}
 # tm = dt[4].split(":")

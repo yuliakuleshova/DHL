@@ -4,6 +4,9 @@
 import sqlite3
 import requests
 import pytz
+import json
+import yaml
+import jinja2
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -69,35 +72,37 @@ def get_news_from_date(date: str):
     :return: List of dictionaries of news from the date
     """
     search_interval = get_search_interval(date)
-
-    #search_interval = [1696389834, 1696488726]
-
     news_from_date = cur.execute("SELECT link, title, date, description FROM rss WHERE date <= ? AND date >= ?",
                                  (search_interval[1], search_interval[0])).fetchall()
-
     print(news_from_date)
-
-    # SELECT link, title, date, description
-    # FROM rss
-    # WHERE date <= 1696488726 AND date >= 1696389834
     return news_from_date
 
 
-# for i in range(len(answer.split("\n"))):
-#     if answer.split("\n")[i] == '<item>':
-#         news = {}
-#         news['title'] = answer.split("\n")[i + 1].replace("<title>", "").replace("</title>", "").replace("    ", "")
-#         news['link'] = answer.split("\n")[i + 2].replace("<link>", "").replace("</link>", "").replace("    ", "")
-#         news['date'] = convert_to_unixtime(answer.split("\n")[i + 3].replace("<pubDate>", "").replace("</pubDate>", "").replace("    ", ""))
-#         news['decription'] = answer.split("\n")[i + 4].replace("<description>", "").replace("</description>",
-#                                                                                             "").replace("    ", "")
-#         query = cur.execute("SELECT 1 link FROM rss WHERE link=?", [news['link']]).fetchone()
-#         if not query:
-#             cur.execute("INSERT INTO rss VALUES (?, ?, ?, ?)",
-#                         (news['link'], news['title'], news['date'], news['decription']))
-#             con.commit()
-#         all_news.append(news)
+for i in range(len(answer.split("\n"))):
+    if answer.split("\n")[i] == '<item>':
+        news = {}
+        news['title'] = answer.split("\n")[i + 1].replace("<title>", "").replace("</title>", "").replace("    ", "")
+        news['link'] = answer.split("\n")[i + 2].replace("<link>", "").replace("</link>", "").replace("    ", "")
+        news['date'] = convert_to_unixtime(answer.split("\n")[i + 3].replace("<pubDate>", "").replace("</pubDate>", "").replace("    ", ""))
+        news['decription'] = answer.split("\n")[i + 4].replace("<description>", "").replace("</description>",
+                                                                                            "").replace("    ", "")
+        #print(news['link'])
+        query = cur.execute("SELECT 1 link FROM rss WHERE link=?", [news['link']]).fetchone()
+        if not query:
+            cur.execute("INSERT INTO rss VALUES (?, ?, ?, ?)",
+                        (news['link'], news['title'], news['date'], news['decription']))
+            #print('Added to DB')
+            con.commit()
+        #else:
+            #print('Found in DB')
+        all_news.append(news)
 
-print(get_search_interval("11:10:2023"))
+print(str(all_news).replace('\'', '"'))
+news_json = json.loads(str(all_news).replace('\'', '"'))
+print(news_json)
+# Homework: Use json.load to put raw strings into news_json
+news_yaml = yaml.dump(news_json, allow_unicode=True)
+print(news_yaml)
+# Homework: find out about sorting
 
-get_news_from_date("05:10:2023")
+#get_news_from_date("05:10:2023")

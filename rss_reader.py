@@ -104,5 +104,6 @@ print(news_json)
 news_yaml = yaml.dump(news_json, allow_unicode=True)
 print(news_yaml)
 # Homework: find out about sorting
+# Template
 
 #get_news_from_date("05:10:2023")

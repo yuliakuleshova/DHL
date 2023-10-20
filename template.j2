@@ -5,14 +5,10 @@
 </head>
 <body>
     <ul id="navigation">
-    {% for item in navigation %}
-        <li><a href="{{ item.href }}">{{ item.caption }}</a></li>
+    {% for item in RSS %}
+        <li><a href="{{ item.link }}">{{ item.title }}</a></li>
     {% endfor %}
     </ul>
 
-    <h1>My Webpage</h1>
-    {{ a_variable }}
-
-    {# a comment #}
 </body>
 </html>

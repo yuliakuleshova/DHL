@@ -97,12 +97,21 @@ for i in range(len(answer.split("\n"))):
             #print('Found in DB')
         all_news.append(news)
 
-print(str(all_news).replace('\'', '"'))
+#print(str(all_news).replace('\'', '"'))
 news_json = json.loads(str(all_news).replace('\'', '"'))
-print(news_json)
+#print(news_json)
 # Homework: Use json.load to put raw strings into news_json
 news_yaml = yaml.dump(news_json, allow_unicode=True)
-print(news_yaml)
+#print(news_yaml)
+data_yaml = {}
+data_yaml['RSS'] = news_json
+print(yaml.dump(data_yaml, allow_unicode=True))
+
+# with open('template.j2', 'r', encoding='utf-8') as j2:
+#     html_text = jinja2.Template(j2)
+#
+# print(html_text.render(yaml.dump(data_yaml, allow_unicode=True)))
+
 # Homework: find out about sorting
 # Template
 

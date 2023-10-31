@@ -4,9 +4,8 @@
 import sqlite3
 import requests
 import pytz
-import json
-import yaml
-import jinja2
+
+
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -16,6 +15,19 @@ con = sqlite3.connect("opennet.sqlite")
 cur = con.cursor()
 answer = requests.get(url).text
 all_news = []
+
+def create_result_data(date: list):
+    """
+    :param date:
+    :return: write search results to the file
+    """
+    HEADER = '<!DOCTYPE html><html lang="RU"><head><title>All newses</title></head><body><ul id="navigation">'
+    BODY = ''
+    FOOTER = '</ul></body></html>'
+
+    for item in date:
+        BODY = BODY+f'<li><a href="{item['link']}">{item['title']}</a></li>'
+    return HEADER+BODY+FOOTER
 
 
 def print_news(all_news, num = 5):
@@ -98,15 +110,16 @@ for i in range(len(answer.split("\n"))):
         all_news.append(news)
 
 #print(str(all_news).replace('\'', '"'))
-news_json = json.loads(str(all_news).replace('\'', '"'))
-#print(news_json)
-# Homework: Use json.load to put raw strings into news_json
-news_yaml = yaml.dump(news_json, allow_unicode=True)
-#print(news_yaml)
-data_yaml = {}
-data_yaml['RSS'] = news_json
-print(yaml.dump(data_yaml, allow_unicode=True))
+# news_json = json.loads(str(all_news).replace('\'', '"'))
+# #print(news_json)
+# # Homework: Use json.load to put raw strings into news_json
+# news_yaml = yaml.dump(news_json, allow_unicode=True)
+# #print(news_yaml)
+# data_yaml = {}
+# data_yaml['RSS'] = news_json
+# print(yaml.dump(data_yaml, allow_unicode=True))
 
+print(create_result_data(all_news))
 # with open('template.j2', 'r', encoding='utf-8') as j2:
 #     html_text = jinja2.Template(j2)
 #

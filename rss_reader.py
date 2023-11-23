@@ -29,10 +29,10 @@ args = parser.parse_args()
 
 def create_result_data(data: list):
     """
-    :param data:
-    :return: write search results to the file
+    :param data: list of dictionary all news
+    :return: generate html code
     """
-    # TODO add descriptions
+
     html_header = ('<!DOCTYPE html><html lang="RU"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" '
                    '/><head><title>All newses</title></head><body><ul id="navigation">')
     html_body = ''
@@ -45,11 +45,11 @@ def create_result_data(data: list):
 
 def print_news(all_news, num=5):
     """
-    :param all_news:
-    :param num:
-    :return:
+    :param all_news: list of dictionary all news
+    :param num: number of news to print
+    :return: print news
     """
-    # TODO add descriptions
+
     for i in range(num):
         print(all_news[i])
         print('/n')
@@ -84,15 +84,14 @@ def get_search_interval(date: str):
     return search_interval
 
 
-def create_result_file(date: list):
+def create_result_file(data: list):
     """
-    :param date:
-    :return: write search results to the file
+    :param data: list of dictionary all news
+    :return: write generated html code to the file
     """
-    # TODO add descriptions
+
     f = open("news.html", "w", encoding="utf-8")
-    for i in range(len(date)):
-        f.write(str(date[i]))
+    f.write(create_result_data(data))
     f.close()
 
 
@@ -134,8 +133,10 @@ if __name__ == '__main__':
     if args.count:
         if 1 <= int(args.count) <= 50:
             print(all_news[0:int(args.count)]) # TODO исправить отображение на человекочитаемое через фукцию обработки json'а
+            # json_to_text(all_news[0:int(args.count)])
         elif int(args.count) > 50:
             print("print 50 news from url and count-50 from DB without DB update") # TODO всё что и выше + вытянуть из DB*
+            # json_to_text(...)
         else:
             print(f"{args.count} is unacceptable value. Should be positive value")
         sys.exit(0)
@@ -149,4 +150,4 @@ if __name__ == '__main__':
         sys.exit(0)
 
 
-    create_result_file(create_result_data(all_news))
+    create_result_file(all_news)

@@ -60,7 +60,7 @@ def convert_to_unixtime(datatime: str):
     :param datatime: input string with data and time
     :return: unix timestamp
     """
-    mnth = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}  # TODO add months
+    mnth = dict(Jan=1, Feb=2, Mar=3, Apr=4, May=5, Jun=6, Jul=7, Aug=8, Sep=9, Oct=10, Nov=11, Dec=12)
     dt = datatime.split(" ")
     tm = dt[4].split(":")
     tz1 = pytz.timezone('Europe/Moscow')
@@ -148,6 +148,5 @@ if __name__ == '__main__':
     if args.search_by_title:
         print("Search in DB by title")
         sys.exit(0)
-
 
     create_result_file(all_news)

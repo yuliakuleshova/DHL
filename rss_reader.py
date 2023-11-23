@@ -109,7 +109,7 @@ def get_news_from_date(date: str):
 
 
 def json_to_text(json_data: json):
-    ...
+    ... # Написать функцию преобразования json данных в человеко-читаемый текст для отображения на экране
     text_from_json = ""
     return text_from_json # TODO следует использовать переносы строк '\n'
 

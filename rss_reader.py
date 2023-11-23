@@ -1,14 +1,14 @@
 """ RSS reader """
 
-
+import argparse
 import sqlite3
 import requests
 import pytz
-
+import sys
+import json
 
 import time
-from datetime import datetime, timezone, timedelta
-
+from datetime import datetime
 
 url = 'https://www.opennet.ru/opennews/opennews_all_utf.rss'
 con = sqlite3.connect("opennet.sqlite")
@@ -16,26 +16,40 @@ cur = con.cursor()
 answer = requests.get(url).text
 all_news = []
 
+parser = argparse.ArgumentParser(
+                    prog='ProgramName',
+                    description='Uses one of parameters',
+                    epilog='Text at the bottom of help')
+
+parser.add_argument('-c', '--count', help="Number of news to print")
+parser.add_argument('-sd', '--search_by_date', help="Search by date")
+parser.add_argument('-st', '--search_by_title', help="Search by title")
+args = parser.parse_args()
+
+
 def create_result_data(data: list):
     """
-    :param data:
-    :return: write search results to the file
+    :param data: list of dictionary all news
+    :return: generate html code
     """
-    HEADER = '<!DOCTYPE html><html lang="RU"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><head><title>All newses</title></head><body><ul id="navigation">'
-    BODY = ''
-    FOOTER = '</ul></body></html>'
+
+    html_header = ('<!DOCTYPE html><html lang="RU"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" '
+                   '/><head><title>All newses</title></head><body><ul id="navigation">')
+    html_body = ''
+    html_footer = '</ul></body></html>'
 
     for item in data:
-        BODY = BODY+f'<li><a href="{item['link']}">{item['title']}</a></li>'
-    return HEADER+BODY+FOOTER
+        html_body = html_body + f'<li><a href="{item['link']}">{item['title']}</a></li>'
+    return html_header + html_body + html_footer
 
 
-def print_news(all_news, num = 5):
+def print_news(all_news, num=5):
     """
-    :param all_news:
-    :param num:
-    :return:
+    :param all_news: list of dictionary all news
+    :param num: number of news to print
+    :return: print news
     """
+
     for i in range(num):
         print(all_news[i])
         print('/n')
@@ -46,7 +60,8 @@ def convert_to_unixtime(datatime: str):
     :param datatime: input string with data and time
     :return: unix timestamp
     """
-    mnth = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+
+    mnth = dict(Jan=1, Feb=2, Mar=3, Apr=4, May=5, Jun=6, Jul=7, Aug=8, Sep=9, Oct=10, Nov=11, Dec=12)
     dt = datatime.split(" ")
     tm = dt[4].split(":")
     tz1 = pytz.timezone('Europe/Moscow')
@@ -70,16 +85,15 @@ def get_search_interval(date: str):
     return search_interval
 
 
-def create_result_file(date: list):
+def create_result_file(data: list):
     """
-    :param date:
-    :return: write search results to the file
+    :param data: list of dictionary all news
+    :return: write generated html code to the file
     """
-    f = open("news.html", "w", encoding="utf-8")
-    for i in range(len(date)):
-        f.write(str(date[i]))
-    f.close()
 
+    f = open("news.html", "w", encoding="utf-8")
+    f.write(create_result_data(data))
+    f.close()
 
 
 def get_news_from_date(date: str):
@@ -94,40 +108,46 @@ def get_news_from_date(date: str):
     return news_from_date
 
 
-for i in range(len(answer.split("\n"))):
-    if answer.split("\n")[i] == '<item>':
-        news = {}
-        news['title'] = answer.split("\n")[i + 1].replace("<title>", "").replace("</title>", "").replace("    ", "")
-        news['link'] = answer.split("\n")[i + 2].replace("<link>", "").replace("</link>", "").replace("    ", "")
-        news['date'] = convert_to_unixtime(answer.split("\n")[i + 3].replace("<pubDate>", "").replace("</pubDate>", "").replace("    ", ""))
-        news['decription'] = answer.split("\n")[i + 4].replace("<description>", "").replace("</description>",
-                                                                                            "").replace("    ", "")
+def json_to_text(json_data: json):
+    ...
+    text_from_json = ""
+    return text_from_json # TODO следует использовать переносы строк '\n'
 
-        query = cur.execute("SELECT 1 link FROM rss WHERE link=?", [news['link']]).fetchone()
-        if not query:
-            cur.execute("INSERT INTO rss VALUES (?, ?, ?, ?)",
-                        (news['link'], news['title'], news['date'], news['decription']))
-            con.commit()
-        all_news.append(news)
 
-#print(str(all_news).replace('\'', '"'))
-# news_json = json.loads(str(all_news).replace('\'', '"'))
-# #print(news_json)
-# # Homework: Use json.load to put raw strings into news_json
-# news_yaml = yaml.dump(news_json, allow_unicode=True)
-# #print(news_yaml)
-# data_yaml = {}
-# data_yaml['RSS'] = news_json
-# print(yaml.dump(data_yaml, allow_unicode=True))
+if __name__ == '__main__':
+    for i in range(len(answer.split("\n"))):
+        if answer.split("\n")[i] == '<item>':
+            news = {}
+            news['title'] = answer.split("\n")[i + 1].replace("<title>", "").replace("</title>", "").replace("    ", "")
+            news['link'] = answer.split("\n")[i + 2].replace("<link>", "").replace("</link>", "").replace("    ", "")
+            news['date'] = convert_to_unixtime(
+                answer.split("\n")[i + 3].replace("<pubDate>", "").replace("</pubDate>", "").replace("    ", ""))
+            news['decription'] = answer.split("\n")[i + 4].replace("<description>", "").replace("</description>",
+                                                                                                "").replace("    ", "")
+            query = cur.execute("SELECT 1 link FROM rss WHERE link=?", [news['link']]).fetchone()
+            if not query:
+                cur.execute("INSERT INTO rss VALUES (?, ?, ?, ?)",
+                            (news['link'], news['title'], news['date'], news['decription']))
+                con.commit()
+            all_news.append(news)
 
-#print(create_result_data(all_news))
-create_result_file(create_result_data(all_news))
-# with open('template.j2', 'r', encoding='utf-8') as j2:
-#     html_text = jinja2.Template(j2)
-#
-# print(html_text.render(yaml.dump(data_yaml, allow_unicode=True)))
+    if args.count:
+        if 1 <= int(args.count) <= 50:
+            print(all_news[0:int(args.count)]) # TODO исправить отображение на человекочитаемое через фукцию обработки json'а
+            # json_to_text(all_news[0:int(args.count)])
+        elif int(args.count) > 50:
+            print("print 50 news from url and count-50 from DB without DB update") # TODO всё что и выше + вытянуть из DB*
+            # json_to_text(...)
+        else:
+            print(f"{args.count} is unacceptable value. Should be positive value")
+        sys.exit(0)
 
-# Homework: find out about sorting
-# Template
+    if args.search_by_date:
+        print("Search in DB by date")
+        sys.exit(0)
 
-#get_news_from_date("05:10:2023")
+    if args.search_by_title:
+        print("Search in DB by title")
+        sys.exit(0)
+
+    create_result_file(all_news)

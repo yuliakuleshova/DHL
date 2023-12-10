@@ -109,9 +109,12 @@ def get_news_from_date(date: str):
 
 
 def json_to_text(json_data: json):
-    ... # Написать функцию преобразования json данных в человеко-читаемый текст для отображения на экране
+
     text_from_json = ""
-    return text_from_json # TODO следует использовать переносы строк '\n'
+    for news in json_data:
+        for value in news.values():
+            text_from_json = text_from_json + str(value) + '\n'
+    return text_from_json
 
 
 if __name__ == '__main__':
@@ -133,10 +136,16 @@ if __name__ == '__main__':
 
     if args.count:
         if 1 <= int(args.count) <= 50:
-            print(all_news[0:int(args.count)]) # TODO исправить отображение на человекочитаемое через фукцию обработки json'а
-            # json_to_text(all_news[0:int(args.count)])
+            print(json_to_text(all_news[0:int(args.count)]))
         elif int(args.count) > 50:
-            print("print 50 news from url and count-50 from DB without DB update") # TODO всё что и выше + вытянуть из DB*
+            print(json_to_text(all_news[0:50]))
+            #Функция, принимающая на вход аргумент-50 и выбирающая из базы дельту внутри функции преобразования табличных данных в json
+            #
+            for i in range(1, (int(args.count) - 50):
+                cur.execute('SELECT 1 FROM rss WHERE link=?', link)
+                row = cur.fetchall()
+                print(json_to_text(row)
+    #print("print 50 news from url and count-50 from DB without DB update") # TODO всё что и выше + вытянуть из DB* ориентироваться на ID в url в функцию форм-ия json
             # json_to_text(...)
         else:
             print(f"{args.count} is unacceptable value. Should be positive value")

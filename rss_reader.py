@@ -109,12 +109,15 @@ def get_news_from_date(date: str):
 
 
 def json_to_text(json_data: json):
-    ...
+
     text_from_json = ""
-    return text_from_json # TODO следует использовать переносы строк '\n'
+    for news in json_data:
+        for value in news.values():
+            text_from_json = text_from_json + str(value) + '\n'
+    return text_from_json
 
 
-if __name__ == '__main__':
+def get_news_from_site():
     for i in range(len(answer.split("\n"))):
         if answer.split("\n")[i] == '<item>':
             news = {}
@@ -122,7 +125,7 @@ if __name__ == '__main__':
             news['link'] = answer.split("\n")[i + 2].replace("<link>", "").replace("</link>", "").replace("    ", "")
             news['date'] = convert_to_unixtime(
                 answer.split("\n")[i + 3].replace("<pubDate>", "").replace("</pubDate>", "").replace("    ", ""))
-            news['decription'] = answer.split("\n")[i + 4].replace("<description>", "").replace("</description>",
+            news['description'] = answer.split("\n")[i + 4].replace("<description>", "").replace("</description>",
                                                                                                 "").replace("    ", "")
             query = cur.execute("SELECT 1 link FROM rss WHERE link=?", [news['link']]).fetchone()
             if not query:
@@ -130,14 +133,39 @@ if __name__ == '__main__':
                             (news['link'], news['title'], news['date'], news['decription']))
                 con.commit()
             all_news.append(news)
+    return all_news
+
+def get_from_db(count: int):
+    limit = count
+    news_from_site_db = []
+    get_news_from_site()
+    cur.execute("SELECT link, title, date, description FROM (SELECT * FROM rss ORDER BY link DESC) AS A LIMIT ?", (str(limit),))
+    rows = cur.fetchall()
+    for title, link, date, description in rows:
+        news = {}
+        news['title'] = title
+        news['link'] = link
+        news['date'] = date
+        news['description'] = description
+        news_from_site_db.append(news)
+    return news_from_site_db
+    #return news_from_site_db
+
+
+if __name__ == '__main__':
+
+    #print(get_news_from_site())
 
     if args.count:
         if 1 <= int(args.count) <= 50:
-            print(all_news[0:int(args.count)]) # TODO исправить отображение на человекочитаемое через фукцию обработки json'а
-            # json_to_text(all_news[0:int(args.count)])
+            print(json_to_text(all_news[0:int(args.count)]))
         elif int(args.count) > 50:
-            print("print 50 news from url and count-50 from DB without DB update") # TODO всё что и выше + вытянуть из DB*
-            # json_to_text(...)
+            #print(json_to_text(all_news[0:49]))
+            #Функция, принимающая на вход аргумент-50 и выбирающая из базы дельту внутри функции преобразования табличных данных в json
+            #
+            print(len(get_from_db(int(args.count))))
+
+
         else:
             print(f"{args.count} is unacceptable value. Should be positive value")
         sys.exit(0)
@@ -147,7 +175,7 @@ if __name__ == '__main__':
         sys.exit(0)
 
     if args.search_by_title:
-        print("Search in DB by title")
+        print("Search in DB by title") #TODO Homework
         sys.exit(0)
 
     create_result_file(all_news)

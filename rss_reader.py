@@ -95,6 +95,13 @@ def create_result_file(data: list):
     f.write(create_result_data(data))
     f.close()
 
+def json_to_text(json_data: json):
+
+    text_from_json = ""
+    for news in json_data:
+        for value in news.values():
+            text_from_json = text_from_json + str(value) + '\n'
+    return text_from_json
 
 def get_news_from_date(date: str):
     """
@@ -107,14 +114,23 @@ def get_news_from_date(date: str):
     print(news_from_date)
     return news_from_date
 
-
-def json_to_text(json_data: json):
-
-    text_from_json = ""
-    for news in json_data:
-        for value in news.values():
-            text_from_json = text_from_json + str(value) + '\n'
-    return text_from_json
+def search_by_title(title_par: str):
+    """
+    :param title: Input data for search by title
+    :return: List of dictionaries of news contained title
+    """
+    title_par = "%" + title_par + "%"
+    news_by_title = cur.execute("SELECT link, title, date, description FROM (SELECT * FROM rss ORDER BY link DESC) WHERE title LIKE ?",
+                                (str(title_par),)).fetchall()
+    news_from_db = []
+    for title, link, date, description in news_by_title:
+        news = {}
+        news['title'] = title
+        news['link'] = link
+        news['date'] = date
+        news['description'] = description
+        news_from_db.append(news)
+    return news_from_db
 
 
 def get_news_from_site():
@@ -175,7 +191,9 @@ if __name__ == '__main__':
         sys.exit(0)
 
     if args.search_by_title:
-        print("Search in DB by title") #TODO Homework
+        print("Search in DB by title") #TODO to find how to search case insensitive in RU
+        print(json_to_text(search_by_title(args.search_by_title)))
         sys.exit(0)
 
     create_result_file(all_news)
+#TODO optimize functions, decrease main, delete old files in the project

@@ -1,5 +1,12 @@
 """ RSS reader """
 
+#TODO Add config file with some sources (urls)
+# Refactor function get_news_from_site()
+# - Use parcer for xml
+# Add read-only to DB
+# Add DB for each source
+#
+
 import argparse
 import sqlite3
 import sys

@@ -3,7 +3,7 @@
 #TODO Add config file with some sources (urls)
 # Refactor function get_news_from_site()
 # - Use parcer for xml
-# OpenNet RSS https://www.opennet.ru/opennews/opennews_all_utf.rss to parse with rss-parser, xmltodict, elementtree
+# OpenNet RSS https://www.opennet.ru/opennews/opennews_all_utf.rss to parse with rss-parser (done), xmltodict (done), elementtree
 # in separate python scripts. Write down the questions.
 # Add read-only to DB
 # Add DB for each source

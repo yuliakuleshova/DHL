@@ -1,7 +1,8 @@
 from rss_parser import Parser
-from requests import get  # noqa
+from requests import get
 
-rss_url = "https://www.reddit.com/.rss"
+
+rss_url = "https://www.opennet.ru/opennews/opennews_all_utf.rss"
 response = get(rss_url)
 
 rss = Parser.parse(response.text)
